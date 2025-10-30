@@ -46,17 +46,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const apiUrl = `https://whatsapp-data.p.rapidapi.com/wspicture?phone=${fullPhone}`
+    const apiUrl = `https://whatsapp-profile-pic.p.rapidapi.com/wspic/url?phone=${fullPhone}`
 
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
-        "X-RapidAPI-Key": "663753efb4mshcbbdde11e811789p149069jsnd73bd1ba7a71",
-        "X-RapidAPI-Host": "whatsapp-data.p.rapidapi.com",
+        "x-rapidapi-key": "f74236b7e6msh8ca93f03154347cp11c3bfjsn68a073735bf1",
+        "x-rapidapi-host": "whatsapp-profile-pic.p.rapidapi.com",
         "Content-Type": "application/json",
       },
       signal: AbortSignal.timeout?.(10_000),
     })
+
+    console.log("[v0] API Response status:", response.status)
 
     // Tratamento de rate limit
     if (response.status === 429) {
@@ -78,8 +80,19 @@ export async function POST(request: NextRequest) {
 
     const responseText = await response.text()
 
+    console.log("[v0] API Response body:", responseText)
+
+    let photoUrl: string
+    try {
+      const jsonResponse = JSON.parse(responseText)
+      photoUrl = jsonResponse.url || jsonResponse.result || jsonResponse.photo_url
+    } catch {
+      // If not JSON, treat as direct URL
+      photoUrl = responseText.trim()
+    }
+
     // Valida se a resposta contém uma URL válida
-    if (!responseText || responseText.trim() === "" || !responseText.startsWith("https://")) {
+    if (!photoUrl || photoUrl.trim() === "" || !photoUrl.startsWith("https://")) {
       console.log("[v0] Invalid or empty response, returning fallback")
       return NextResponse.json(fallbackPayload, {
         status: 200,
@@ -89,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     // Armazena no cache
     cache.set(fullPhone, {
-      result: responseText.trim(),
+      result: photoUrl.trim(),
       timestamp: Date.now(),
     })
 
@@ -103,7 +116,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        result: responseText.trim(),
+        result: photoUrl.trim(),
         is_photo_private: false,
       },
       {

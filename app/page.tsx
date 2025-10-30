@@ -1710,7 +1710,7 @@ export default function SpySystem() {
         return (
           <div className="text-center space-y-8">
             <p className="text-3xl md:text-4xl font-bold text-white max-w-2xl mx-auto leading-relaxed animate-fade-in">
-              “Want full access to secret profiles, deleted conversations, and like history?”
+              "Want full access to secret profiles, deleted conversations, and like history?"
             </p>
             {timeLeft > 0 ? (
               <p className="text-2xl md:text-3xl font-bold text-yellow-400 animate-pulse">
@@ -1720,9 +1720,7 @@ export default function SpySystem() {
               <p className="text-2xl md:text-3xl font-bold text-red-500">Offer expired!</p>
             )}
             <Button
-              onClick={() =>
-                (window.location.href = "https://pay.mundpay.com/01997889-d90f-7176-b1ad-330b2aadd114?ref=")
-              }
+              onClick={() => (window.location.href = "https://app.monetizze.com.br/checkout/KPB444759")}
               disabled={timeLeft === 0}
               className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed"
             >

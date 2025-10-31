@@ -671,7 +671,7 @@ export default function SpySystem() {
                     <option value="+225">🇨🇮 +225</option>
                     <option value="+226">🇧🇫 +226</option>
                     <option value="+227">🇳🇪 +227</option>
-                    <option value="+228">🇹🇬 +228</option>
+                    <option value="+228">توج +228</option>
                     <option value="+229">🇧🇯 +229</option>
                     <option value="+230">🇲🇺 +230</option>
                     <option value="+231">🇱🇷 +231</option>
@@ -771,7 +771,7 @@ export default function SpySystem() {
                     <option value="+673">🇧🇳 +673</option>
                     <option value="+674">🇳🇷 +674</option>
                     <option value="+675">🇵🇬 +675</option>
-                    <option value="+676">🇹🇴 +676</option>
+                    <option value="+676">توج +676</option>
                     <option value="+677">🇸🇧 +677</option>
                     <option value="+678">🇻🇺 +678</option>
                     <option value="+679">🇫🇯 +679</option>
@@ -783,7 +783,7 @@ export default function SpySystem() {
                     <option value="+685">🇼🇸 +685</option>
                     <option value="+686">🇰🇮 +686</option>
                     <option value="+687">🇳🇨 +687</option>
-                    <option value="+688">🇹🇻 +688</option>
+                    <option value="+688">توج +688</option>
                     <option value="+689">🇵🇫 +689</option>
                     <option value="+690">🇹🇰 +690</option>
                     <option value="+691">🇫🇲 +691</option>
@@ -1720,7 +1720,7 @@ export default function SpySystem() {
               <p className="text-2xl md:text-3xl font-bold text-red-500">Offer expired!</p>
             )}
             <Button
-              onClick={() => (window.location.href = "https://app.monetizze.com.br/checkout/KPB444759")}
+              onClick={() => (window.location.href = "https://global.tribopay.com.br/450202ourq")}
               disabled={timeLeft === 0}
               className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed"
             >

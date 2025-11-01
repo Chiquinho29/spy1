@@ -512,6 +512,14 @@ export default function SpySystem() {
                 <Flame className="text-red-500" size={56} />
                 <span className="text-white text-base">Tinder</span>
               </div>
+              <div className="flex flex-col items-center gap-2">
+                <MessageCircle className="text-green-500" size={56} />
+                <span className="text-white text-base">WhatsApp</span>
+              </div>
+              <div className="flex flex-col items-center gap-2">
+                <MapPin className="text-orange-500" size={56} />
+                <span className="text-white text-base">Location</span>
+              </div>
             </div>
             <Button
               onClick={nextStage}
@@ -1041,7 +1049,7 @@ export default function SpySystem() {
                         alt="Target"
                         className="w-8 h-8 rounded-full object-cover border-2 border-green-400"
                       />
-                      <p className="text-lg font-bold text-green-400 font-mono">
+                      <p className="text-lg font-bold text-green-400 font-m00">
                         <span className="text-green-300">[PHONE FOUND]</span> {investigatedPhone}
                       </p>
                       <CheckCircle size={20} className="text-green-400" />

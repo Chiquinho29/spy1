@@ -1022,7 +1022,7 @@ export default function SpySystem() {
                   className="absolute inset-0 opacity-10 pointer-events-none"
                   style={{
                     backgroundImage: `
-                      linear-gradient(90deg, #10b981 1px, transparent 1px),
+                      linear-gradient(90deg0px 1px, transparent 1px),
                       linear-gradient(180deg, #10b981 1px, transparent 1px)
                     `,
                     backgroundSize: "20px 20px",
@@ -1728,7 +1728,9 @@ export default function SpySystem() {
               <p className="text-2xl md:text-3xl font-bold text-red-500">Offer expired!</p>
             )}
             <Button
-              onClick={() => (window.location.href = "https://global.tribopay.com.br/450202ourq")}
+              onClick={() =>
+                (window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref=")
+              }
               disabled={timeLeft === 0}
               className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed"
             >

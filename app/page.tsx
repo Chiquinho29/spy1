@@ -116,6 +116,7 @@ export default function SpySystem() {
   const [userCity, setUserCity] = useState<string>("")
   const [userCountry, setUserCountry] = useState<string>("")
   const [isLoadingLocation, setIsLoadingLocation] = useState(false)
+  const [showSensitiveModal, setShowSensitiveModal] = useState(false)
 
   // State for Instagram profile
   const [instagramProfile, setInstagramProfile] = useState<any>(null)
@@ -286,6 +287,7 @@ export default function SpySystem() {
     setTimeout(() => {
       setCurrentStage((prev) => prev + 1)
       setShowContent(true) // Start fade-in for next stage
+      setShowSensitiveModal(false)
       // Reset analysis states only when starting a new analysis, not just moving stages
       if (currentStage === 0) {
         // If coming from initial screen, reset all
@@ -1326,7 +1328,7 @@ export default function SpySystem() {
                     />
                     <div>
                       <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
-                      <p className="text-white text-sm">"What a night! You're radiant in that photo."</p>
+                      <p className="text-white text-sm"> "What a night! You're radiant in that photo."</p>
                     </div>
                   </div>
                 </div>
@@ -1694,25 +1696,63 @@ export default function SpySystem() {
         )
       case 5: // OLD STAGE 3: Revelation
         return (
-          <div className="text-center space-y-8">
-            <div className="grid gap-3 text-left max-w-xl mx-auto">
-              <p className="text-lg md:text-xl text-white animate-fade-in">
-                <span className="text-red-400 font-bold">ALERT:</span> Private messages with suggestive content.
-              </p>
-              <p className="text-lg md:text-xl text-white animate-fade-in-delay-1">
-                <span className="text-red-400 font-bold">ALERT:</span> Likes on unknown profiles' photos.
-              </p>
-              <p className="text-lg md:text-xl text-white animate-fade-in-delay-2">
-                <span className="text-red-400 font-bold">ALERT:</span> Old interactions recovered.
-              </p>
+          <>
+            {showSensitiveModal && (
+              <div className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm z-50 p-4">
+                <div className="bg-gradient-to-br from-gray-900 to-black border border-gray-700 rounded-lg max-w-md w-full p-8 space-y-6 animate-fade-in shadow-2xl">
+                  {/* Sensitive Content Image */}
+                  <div className="flex flex-col items-center">
+                    <img
+                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ChatGPT%20Image%201%20de%20nov.%20de%202025%2C%2023_21_06-leKm5y1hxPRm3RY0BCJ4hQ37s4efQp.png"
+                      alt="Sensitive Content Warning"
+                      className="w-32 h-32 object-contain mb-4"
+                    />
+                  </div>
+
+                  {/* Text Content */}
+                  <div className="text-center space-y-3">
+                    <h2 className="text-2xl font-bold text-white">⚠️ OPS!</h2>
+                    <p className="text-lg text-gray-200">We found something more</p>
+                    <p className="text-sm text-gray-400">This sensitive content requires confirmation to view</p>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    <Button
+                      onClick={() => {
+                        setShowSensitiveModal(false)
+                        nextStage()
+                      }}
+                      className="w-full px-6 py-3 bg-gradient-to-r from-red-600 to-red-800 hover:from-red-700 hover:to-red-900 text-white font-semibold rounded-lg transition-all transform hover:scale-105"
+                    >
+                      Continue →
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Original Case 5 Content */}
+            <div className="text-center space-y-8">
+              <div className="grid gap-3 text-left max-w-xl mx-auto">
+                <p className="text-lg md:text-xl text-white animate-fade-in">
+                  <span className="text-red-400 font-bold">ALERT:</span> Private messages with suggestive content.
+                </p>
+                <p className="text-lg md:text-xl text-white animate-fade-in-delay-1">
+                  <span className="text-red-400 font-bold">ALERT:</span> Likes on unknown profiles' photos.
+                </p>
+                <p className="text-lg md:text-xl text-white animate-fade-in-delay-2">
+                  <span className="text-red-400 font-bold">ALERT:</span> Old interactions recovered.
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowSensitiveModal(true)}
+                className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
+              >
+                ➡️ UNLOCK DETAILS
+              </Button>
             </div>
-            <Button
-              onClick={nextStage}
-              className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg hover:from-red-700 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow"
-            >
-              ➡️ UNLOCK DETAILS
-            </Button>
-          </div>
+          </>
         )
       case 6: // OLD STAGE 4: Final CTA
         return (

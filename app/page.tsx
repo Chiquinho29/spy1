@@ -39,7 +39,7 @@ const setAvatarLocalCache = (user: string, url: string) => {
   if (!user || !url) return
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
     cache[user] = { url, ts: Date.now() }
     localStorage.setItem(key, JSON.stringify(cache))
     console.log("[v0] Cached Instagram avatar for:", user)
@@ -433,7 +433,6 @@ export default function SpySystem() {
     if (!phoneNumber || phoneNumber.length < 8) return
 
     setIsLoadingPhoto(true)
-
     try {
       const response = await fetch("/api/whatsapp-photo", {
         method: "POST",
@@ -449,18 +448,12 @@ export default function SpySystem() {
       const data = await response.json()
       if (data.success && data.result) {
         setWhatsappPhoto(data.result)
-        setIsLoadingPhoto(false)
-        fetchUserLocation()
-      } else {
-        setWhatsappPhoto("/whatsapp-checkmark.jpeg")
-        setIsLoadingPhoto(false)
         fetchUserLocation()
       }
     } catch (error) {
       console.error("Error fetching WhatsApp photo:", error)
-      setWhatsappPhoto("/whatsapp-checkmark.jpeg")
+    } finally {
       setIsLoadingPhoto(false)
-      fetchUserLocation()
     }
   }
 
@@ -469,16 +462,16 @@ export default function SpySystem() {
     try {
       const response = await fetch("https://wtfismyip.com/json")
       const data = await response.json()
-      const detectedCity = data.YourFuckingCity || "Unknown"
-      const detectedCountry = data.YourFuckingCountry || "Country"
+      const detectedCity = data.YourFuckingCity || "Fortaleza"
+      const detectedCountry = data.YourFuckingCountry || "Brasil"
 
       setUserCity(detectedCity)
       setUserCountry(detectedCountry)
-      setIsLoadingLocation(false)
     } catch (error) {
       console.error("Erro ao obter localização:", error)
-      setUserCity("Detected")
-      setUserCountry("Location")
+      setUserCity("Fortaleza")
+      setUserCountry("Brasil")
+    } finally {
       setIsLoadingLocation(false)
     }
   }
@@ -1181,10 +1174,10 @@ export default function SpySystem() {
                   <span className="text-green-400">[SYSTEM_LOG]</span> New activity detected:
                 </p>
                 <p className="text-base text-white font-mono ml-3">
-                  <span className="text-blue-400">[INSTAGRAM]</span> New message from @alexia_30.
+                  <span className="text-blue-400">[INSTAGRAM]</span> @alexia_30 liked your photo.
                 </p>
                 <p className="text-base text-white font-mono ml-3">
-                  <span className="text-blue-400">[INSTAGRAM]</span> @alexia_30 liked your photo.
+                  <span className="text-blue-400">[INSTAGRAM]</span> New message from @izes.
                 </p>
               </div>
 
@@ -1333,7 +1326,7 @@ export default function SpySystem() {
                     />
                     <div>
                       <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
-                      <p className="text-white text-sm"> "What a night! You're radiant in that photo."</p>
+                      <p className="text-white text-sm">"What a night! You're radiant in that photo."</p>
                     </div>
                   </div>
                 </div>

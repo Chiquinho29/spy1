@@ -39,9 +39,9 @@ const setAvatarLocalCache = (user: string, url: string) => {
   if (!user || !url) return
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
     cache[user] = { url, ts: Date.now() }
-    localStorage.setItem(key, JSON.JSON.stringify(cache))
+    localStorage.setItem(key, JSON.stringify(cache))
     console.log("[v0] Cached Instagram avatar for:", user)
   } catch (e) {
     console.error("[v0] Error caching avatar:", e)
@@ -51,7 +51,7 @@ const setAvatarLocalCache = (user: string, url: string) => {
 const getAvatarFromCache = (user: string): string | null => {
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
     if (cache[user] && cache[user].url) {
       console.log("[v0] Found cached avatar for:", user)
       return cache[user].url
@@ -66,9 +66,9 @@ const setProfileLocalCache = (user: string, profile: any) => {
   if (!user || !profile) return
   try {
     const key = "igProfileCacheV1"
-    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
     cache[user] = { profile, ts: Date.now() }
-    localStorage.setItem(key, JSON.JSON.stringify(cache))
+    localStorage.setItem(key, JSON.stringify(cache))
     console.log("[v0] Cached Instagram profile for:", user)
   } catch (e) {
     console.error("[v0] Error caching profile:", e)
@@ -78,7 +78,7 @@ const setProfileLocalCache = (user: string, profile: any) => {
 const getProfileFromCache = (user: string): any | null => {
   try {
     const key = "igProfileCacheV1"
-    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
     if (cache[user] && cache[user].profile) {
       console.log("[v0] Found cached profile for:", user)
       return cache[user].profile
@@ -430,30 +430,44 @@ export default function SpySystem() {
   }, [nextStage, investigatedPhone])
 
   const fetchWhatsAppPhoto = async (phoneNumber: string, countryCode: string) => {
-    if (!phoneNumber || phoneNumber.length < 8) return
+    console.log("[v0] fetchWhatsAppPhoto called with:", { phoneNumber, countryCode })
+
+    if (!phoneNumber || phoneNumber.length < 8) {
+      console.log("[v0] Phone number too short, aborting")
+      return
+    }
 
     setIsLoadingPhoto(true)
+    console.log("[v0] Starting WhatsApp photo fetch...")
+
     try {
       const response = await fetch("/api/whatsapp-photo", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.JSON.stringify({
+        body: JSON.stringify({
           phone: phoneNumber,
           countryCode: countryCode,
         }),
       })
 
+      console.log("[v0] WhatsApp API response status:", response.status)
       const data = await response.json()
+      console.log("[v0] WhatsApp API response data:", data)
+
       if (data.success && data.result) {
+        console.log("[v0] Setting WhatsApp photo:", data.result)
         setWhatsappPhoto(data.result)
         fetchUserLocation()
+      } else {
+        console.log("[v0] WhatsApp API returned no photo")
       }
     } catch (error) {
-      console.error("Error fetching WhatsApp photo:", error)
+      console.error("[v0] Error fetching WhatsApp photo:", error)
     } finally {
       setIsLoadingPhoto(false)
+      console.log("[v0] WhatsApp photo fetch completed")
     }
   }
 
@@ -1326,7 +1340,7 @@ export default function SpySystem() {
                     />
                     <div>
                       <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
-                      <p className="text-white text-sm">"What a night! You're radiant in that photo."</p>
+                      <p className="text-white text-sm"> "What a night! You're radiant in that photo."</p>
                     </div>
                   </div>
                 </div>
@@ -1359,7 +1373,7 @@ export default function SpySystem() {
                     />
                     <div>
                       <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
-                      <p className="text-white text-sm">"Relaxing the right way! Love a good wine."</p>
+                      <p className="text-white text-sm"> "Relaxing the right way! Love a good wine."</p>
                     </div>
                   </div>
                 </div>
@@ -1391,7 +1405,7 @@ export default function SpySystem() {
                     />
                     <div>
                       <p className="text-sm text-gray-300 font-bold">{investigatedHandle || "@alvo"}</p>
-                      <p className="text-white text-sm">"Great energy! Wish I was there with you all."</p>
+                      <p className="text-white text-sm"> "Great energy! Wish I was there with you all."</p>
                     </div>
                   </div>
                 </div>

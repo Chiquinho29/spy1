@@ -39,9 +39,9 @@ const setAvatarLocalCache = (user: string, url: string) => {
   if (!user || !url) return
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
     cache[user] = { url, ts: Date.now() }
-    localStorage.setItem(key, JSON.stringify(cache))
+    localStorage.setItem(key, JSON.JSON.stringify(cache))
     console.log("[v0] Cached Instagram avatar for:", user)
   } catch (e) {
     console.error("[v0] Error caching avatar:", e)
@@ -51,7 +51,7 @@ const setAvatarLocalCache = (user: string, url: string) => {
 const getAvatarFromCache = (user: string): string | null => {
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
     if (cache[user] && cache[user].url) {
       console.log("[v0] Found cached avatar for:", user)
       return cache[user].url
@@ -66,9 +66,9 @@ const setProfileLocalCache = (user: string, profile: any) => {
   if (!user || !profile) return
   try {
     const key = "igProfileCacheV1"
-    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
     cache[user] = { profile, ts: Date.now() }
-    localStorage.setItem(key, JSON.stringify(cache))
+    localStorage.setItem(key, JSON.JSON.stringify(cache))
     console.log("[v0] Cached Instagram profile for:", user)
   } catch (e) {
     console.error("[v0] Error caching profile:", e)
@@ -78,7 +78,7 @@ const setProfileLocalCache = (user: string, profile: any) => {
 const getProfileFromCache = (user: string): any | null => {
   try {
     const key = "igProfileCacheV1"
-    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
     if (cache[user] && cache[user].profile) {
       console.log("[v0] Found cached profile for:", user)
       return cache[user].profile
@@ -439,7 +439,7 @@ export default function SpySystem() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
+        body: JSON.JSON.stringify({
           phone: phoneNumber,
           countryCode: countryCode,
         }),
@@ -1174,10 +1174,10 @@ export default function SpySystem() {
                   <span className="text-green-400">[SYSTEM_LOG]</span> New activity detected:
                 </p>
                 <p className="text-base text-white font-mono ml-3">
-                  <span className="text-blue-400">[INSTAGRAM]</span> @alexia_30 liked your photo.
+                  <span className="text-blue-400">[INSTAGRAM]</span> New message from @alexia_30.
                 </p>
                 <p className="text-base text-white font-mono ml-3">
-                  <span className="text-blue-400">[INSTAGRAM]</span> New message from @izes.
+                  <span className="text-blue-400">[INSTAGRAM]</span> @izes liked your photo.
                 </p>
               </div>
 
@@ -1728,9 +1728,7 @@ export default function SpySystem() {
               <p className="text-2xl md:text-3xl font-bold text-red-500">Offer expired!</p>
             )}
             <Button
-              onClick={() =>
-                (window.location.href = "https://pay.mycheckoutt.com/01997889-d90f-7176-b1ad-330b2aadd114?ref=")
-              }
+              onClick={() => (window.location.href = "https://pay.hotmart.com/K102876182J?checkoutMode=10")}
               disabled={timeLeft === 0}
               className="mt-10 px-10 py-5 text-xl font-bold uppercase bg-gradient-to-r from-red-700 to-black text-white shadow-lg hover:from-red-800 hover:to-gray-900 transition-all duration-300 transform hover:scale-105 animate-pulse-slow disabled:opacity-50 disabled:cursor-not-allowed"
             >

@@ -37,14 +37,19 @@ export async function POST(request: NextRequest) {
     }
 
     // Fetch Instagram profile data using RapidAPI
-    const url = `https://instagram-scraper-api2.p.rapidapi.com/v1/info?username_or_id_or_url=${cleanUsername}`
+    const url = `https://instagram120.p.rapidapi.com/api/instagram/posts`
 
     const response = await fetch(url, {
-      method: "GET",
+      method: "POST",
       headers: {
-        "X-RapidAPI-Key": "663753efb4mshcbbdde11e811789p149069jsnd73bd1ba7a71",
-        "X-RapidAPI-Host": "instagram-scraper-api2.p.rapidapi.com",
+        "Content-Type": "application/json",
+        "x-rapidapi-key": "58476d898amsh61d6476db2514cfp114ab2jsn8e290bed9186",
+        "x-rapidapi-host": "instagram120.p.rapidapi.com",
       },
+      body: JSON.stringify({
+        username: cleanUsername,
+        maxId: "",
+      }),
       signal: AbortSignal.timeout?.(10_000),
     })
 

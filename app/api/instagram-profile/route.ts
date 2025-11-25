@@ -99,20 +99,37 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const userData = data.data.user || data.data
+    const posts = data.data.items || data.data.posts || []
+
     const profileData = {
-      username: data.data.username || cleanUsername,
-      full_name: data.data.full_name || data.data.fullName || "",
-      biography: data.data.biography || data.data.bio || "",
-      profile_pic_url: data.data.profile_pic_url || data.data.profile_pic_url_hd || data.data.profilePicUrl || "",
-      follower_count: data.data.follower_count || data.data.followerCount || data.data.edge_followed_by?.count || 0,
-      following_count: data.data.following_count || data.data.followingCount || data.data.edge_follow?.count || 0,
-      media_count: data.data.media_count || data.data.mediaCount || data.data.edge_owner_to_timeline_media?.count || 0,
-      is_private: data.data.is_private || data.data.isPrivate || false,
-      is_verified: data.data.is_verified || data.data.isVerified || false,
-      category: data.data.category || "",
+      username: userData.username || cleanUsername,
+      full_name: userData.full_name || userData.fullName || userData.name || "",
+      biography: userData.biography || userData.bio || "",
+      profile_pic_url:
+        userData.profile_pic_url ||
+        userData.profile_pic_url_hd ||
+        userData.profilePicUrl ||
+        userData.profilePic ||
+        userData.hd_profile_pic_url_info?.url ||
+        "",
+      follower_count: userData.follower_count || userData.followerCount || userData.edge_followed_by?.count || 0,
+      following_count: userData.following_count || userData.followingCount || userData.edge_follow?.count || 0,
+      media_count: userData.media_count || userData.mediaCount || userData.edge_owner_to_timeline_media?.count || 0,
+      is_private: userData.is_private || userData.isPrivate || false,
+      is_verified: userData.is_verified || userData.isVerified || false,
+      category: userData.category || "",
+      posts: posts.slice(0, 12).map((post: any) => ({
+        id: post.id || post.pk || "",
+        thumbnail: post.thumbnail_url || post.image_versions2?.candidates?.[0]?.url || post.display_url || "",
+        caption: post.caption?.text || post.caption || "",
+        like_count: post.like_count || post.likeCount || 0,
+        comment_count: post.comment_count || post.commentCount || 0,
+        media_type: post.media_type || post.type || 1,
+      })),
     }
 
-    console.log("[v0] Extracted profile data:", JSON.stringify(profileData, null, 2))
+    console.log("[v0] Extracted profile data with posts:", JSON.stringify(profileData, null, 2))
 
     // Cache the result
     cache.set(cleanUsername, {

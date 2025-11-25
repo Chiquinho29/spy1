@@ -36,24 +36,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const response = await fetch("https://instagram120.p.rapidapi.com/api/instagram/posts", {
-      method: "POST",
+    const response = await fetch(`https://simple-instagram-api.p.rapidapi.com/account-info?username=${cleanUsername}`, {
+      method: "GET",
       headers: {
         "x-rapidapi-key": "f74236b7e6msh8ca93f03154347cp11c3bfjsn68a073735bf1",
-        "x-rapidapi-host": "instagram120.p.rapidapi.com",
-        "Content-Type": "application/json",
+        "x-rapidapi-host": "simple-instagram-api.p.rapidapi.com",
       },
-      body: JSON.stringify({
-        username: cleanUsername,
-        maxId: "",
-      }),
     })
 
     console.log("[v0] Instagram API status:", response.status)
-
-    // Get response text first to debug
-    const responseText = await response.text()
-    console.log("[v0] Instagram API raw response:", responseText.substring(0, 200))
 
     if (response.status === 429) {
       console.log("[v0] Rate limit exceeded for Instagram API")
@@ -70,7 +61,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (!response.ok) {
-      console.error("[v0] Instagram API error:", response.status, responseText)
+      console.error("[v0] Instagram API error:", response.status)
       return NextResponse.json(
         {
           success: false,
@@ -83,27 +74,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Try to parse JSON
-    let data
-    try {
-      data = JSON.parse(responseText)
-    } catch (e) {
-      console.error("[v0] Failed to parse Instagram response as JSON:", responseText.substring(0, 100))
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Invalid response from Instagram API",
-        },
-        {
-          status: 502,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        },
-      )
-    }
+    const data = await response.json()
+    console.log("[v0] Instagram API data:", JSON.stringify(data, null, 2))
 
-    console.log("[v0] Instagram API parsed data:", JSON.stringify(data, null, 2))
-
-    if (!data || !data.data) {
+    if (!data || !data.username) {
       console.log("[v0] Invalid response from Instagram API")
       return NextResponse.json(
         {
@@ -117,37 +91,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const userData = data.data.user || data.data
-    const posts = data.data.items || data.data.posts || []
-
     const profileData = {
-      username: userData.username || cleanUsername,
-      full_name: userData.full_name || userData.fullName || userData.name || "",
-      biography: userData.biography || userData.bio || "",
-      profile_pic_url:
-        userData.profile_pic_url ||
-        userData.profile_pic_url_hd ||
-        userData.profilePicUrl ||
-        userData.profilePic ||
-        userData.hd_profile_pic_url_info?.url ||
-        "",
-      follower_count: userData.follower_count || userData.followerCount || userData.edge_followed_by?.count || 0,
-      following_count: userData.following_count || userData.followingCount || userData.edge_follow?.count || 0,
-      media_count: userData.media_count || userData.mediaCount || userData.edge_owner_to_timeline_media?.count || 0,
-      is_private: userData.is_private || userData.isPrivate || false,
-      is_verified: userData.is_verified || userData.isVerified || false,
-      category: userData.category || "",
-      posts: posts.slice(0, 12).map((post: any) => ({
-        id: post.id || post.pk || "",
-        thumbnail: post.thumbnail_url || post.image_versions2?.candidates?.[0]?.url || post.display_url || "",
-        caption: post.caption?.text || post.caption || "",
-        like_count: post.like_count || post.likeCount || 0,
-        comment_count: post.comment_count || post.commentCount || 0,
-        media_type: post.media_type || post.type || 1,
-      })),
+      username: data.username || cleanUsername,
+      full_name: data.full_name || data.fullName || data.name || "",
+      biography: data.biography || data.bio || "",
+      profile_pic_url: data.profile_pic_url || data.profile_pic_url_hd || data.profilePicUrl || "",
+      follower_count: data.follower_count || data.followerCount || 0,
+      following_count: data.following_count || data.followingCount || 0,
+      media_count: data.media_count || data.mediaCount || 0,
+      is_private: data.is_private || data.isPrivate || false,
+      is_verified: data.is_verified || data.isVerified || false,
+      category: data.category || "",
+      posts: [], // Simple API may not include posts, will be empty array
     }
 
-    console.log("[v0] Extracted profile data with posts:", JSON.stringify(profileData, null, 2))
+    console.log("[v0] Extracted profile data:", JSON.stringify(profileData, null, 2))
 
     // Cache the result
     cache.set(cleanUsername, {

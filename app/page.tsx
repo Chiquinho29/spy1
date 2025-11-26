@@ -51,7 +51,7 @@ const setAvatarLocalCache = (user: string, url: string) => {
 const getAvatarFromCache = (user: string): string | null => {
   try {
     const key = "igAvatarCacheV1"
-    const cache = JSON.parse(localStorage.getItem(key) || "{}") || {}
+    const cache = JSON.JSON.parse(localStorage.getItem(key) || "{}") || {}
     if (cache[user] && cache[user].url) {
       console.log("[v0] Found cached avatar for:", user)
       return cache[user].url
@@ -986,7 +986,7 @@ export default function SpySystem() {
 
             {instagramProfile && !isLoadingInstagram && (
               <div className="mt-4 p-4 bg-green-900/30 border border-green-700 rounded-lg max-w-md mx-auto animate-fade-in">
-                <div className="flex items-start space-x-3 mb-3">
+                <div className="flex items-start space-x-3">
                   <div className="w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center relative flex-shrink-0">
                     {instagramImageLoading ? (
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
@@ -1019,25 +1019,11 @@ export default function SpySystem() {
                       {instagramProfile.media_count} posts • {instagramProfile.follower_count.toLocaleString()}{" "}
                       followers
                     </p>
+                    {instagramProfile.biography && (
+                      <p className="text-sm text-gray-300 mt-2">{instagramProfile.biography}</p>
+                    )}
                   </div>
                 </div>
-                {instagramProfile.biography && (
-                  <p className="text-sm text-gray-300 mb-3">{instagramProfile.biography}</p>
-                )}
-
-                {instagramProfile.posts && instagramProfile.posts.length > 0 && (
-                  <div className="grid grid-cols-3 gap-1 mt-3">
-                    {instagramProfile.posts.slice(0, 9).map((post: any, index: number) => (
-                      <div key={index} className="relative w-full h-24 rounded-sm overflow-hidden bg-gray-800">
-                        <img
-                          src={post.thumbnail || "/placeholder.svg"}
-                          alt={`Post ${index + 1}`}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
 
@@ -1048,7 +1034,7 @@ export default function SpySystem() {
                   className="absolute inset-0 opacity-10 pointer-events-none"
                   style={{
                     backgroundImage: `
-                      linear-gradient(90deg0px 1px, transparent 1px),
+                      linear-gradient(90deg, transparent 1px, #10b981 1px),
                       linear-gradient(180deg, #10b981 1px, transparent 1px)
                     `,
                     backgroundSize: "20px 20px",
@@ -1069,13 +1055,13 @@ export default function SpySystem() {
                     <span className="text-yellow-400">[STATUS]</span> Searching for connected accounts...
                   </p>
                   {analysisProgress >= 60 && (
-                    <div className="flex00 flex items-center gap-3 mt-3 p-2 bg-green-900/30 rounded-lg border border-green-700 animate-fade-in">
+                    <div className="flex items-center gap-3 mt-3 p-2 bg-green-900/30 rounded-lg border border-green-700 animate-fade-in">
                       <img
                         src={whatsappPhoto || "/placeholder.svg"}
                         alt="Target"
                         className="w-8 h-8 rounded-full object-cover border-2 border-green-400"
                       />
-                      <p className="text-lg font-bold text-green-400 font-m00">
+                      <p className="text-lg font-bold text-green-400 font-medium">
                         <span className="text-green-300">[PHONE FOUND]</span> {investigatedPhone}
                       </p>
                       <CheckCircle size={20} className="text-green-400" />

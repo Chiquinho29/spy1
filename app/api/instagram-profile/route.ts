@@ -1,180 +1,86 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-const cache = new Map<string, { profile: any; timestamp: number }>()
-const CACHE_TTL = 10 * 60 * 1000 // 10 minutes
-
-export async function POST(request: NextRequest) {
+export async function GET(request: NextRequest) {
   try {
-    const { username } = await request.json()
+    const { searchParams } = new URL(request.url)
+    const imageUrl = searchParams.get("url")
 
-    if (!username) {
-      return NextResponse.json(
-        { success: false, error: "Username is required" },
-        {
-          status: 400,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        },
-      )
+    if (!imageUrl) {
+      return NextResponse.json({ error: "Image URL is required" }, { status: 400 })
     }
 
-    // Remove @ if present
-    const cleanUsername = username.replace("@", "")
-
-    // Check cache first
-    const cached = cache.get(cleanUsername)
-    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-      console.log("[v0] Returning cached Instagram profile")
-      return NextResponse.json(
-        {
-          success: true,
-          profile: cached.profile,
-        },
-        {
-          status: 200,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        },
-      )
+    // 1. Validação de Segurança (Whitelist)
+    // Permite apenas domínios de imagem do Meta/Instagram para evitar uso indevido do seu servidor
+    try {
+      const urlObj = new URL(imageUrl)
+      const allowedDomains = [
+        "instagram.com", 
+        "cdninstagram.com", 
+        "fbcdn.net", 
+        "scontent" // Comum em URLs do Instagram
+      ]
+      
+      const isAllowed = allowedDomains.some(domain => urlObj.hostname.includes(domain))
+      
+      if (!isAllowed) {
+        console.error(`[v0] Blocked attempt to proxy unauthorized domain: ${urlObj.hostname}`)
+        return NextResponse.json({ error: "Forbidden: Domain not allowed" }, { status: 403 })
+      }
+    } catch (e) {
+      return NextResponse.json({ error: "Invalid URL format" }, { status: 400 })
     }
 
-    const response = await fetch("https://instagram120.p.rapidapi.com/api/instagram/posts", {
-      method: "POST",
-      headers: {
-        "x-rapidapi-key": "58476d898amsh61d6476db2514cfp114ab2jsn8e290bed9186",
-        "x-rapidapi-host": "instagram120.p.rapidapi.com",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: cleanUsername,
-        maxId: "",
-      }),
-    })
+    console.log("[v0] Proxying Instagram image:", imageUrl.substring(0, 50) + "...")
 
-    console.log("[v0] Instagram API status:", response.status)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 segundos timeout
 
-    if (response.status === 429) {
-      console.log("[v0] Rate limit exceeded for Instagram API")
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Rate limit exceeded. Please try again later.",
+    try {
+      const response = await fetch(imageUrl, {
+        headers: {
+          // 2. User-Agent atualizado (Chrome mais recente)
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+          "Referer": "https://www.instagram.com/",
+          "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+          "Sec-Fetch-Dest": "image",
+          "Sec-Fetch-Mode": "no-cors",
+          "Sec-Fetch-Site": "cross-site"
         },
-        {
-          status: 429,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        },
-      )
-    }
-
-    if (!response.ok) {
-      console.error("[v0] Instagram API error:", response.status)
-      return NextResponse.json(
-        {
-          success: false,
-          error: `Failed to fetch Instagram profile - API returned ${response.status}`,
-        },
-        {
-          status: response.status,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        },
-      )
-    }
-
-    const data = await response.json()
-    console.log("[v0] Instagram API response received")
-    console.log("[v0] API Response structure:", JSON.stringify(data).substring(0, 200))
-
-    if (!data) {
-      console.log("[v0] Empty response from Instagram API")
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Empty response from Instagram API",
-        },
-        {
-          status: 404,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        },
-      )
-    }
-
-    let posts: any[] = []
-
-    // Instagram120 retorna os posts em data.result.edges
-    if (data.result && Array.isArray(data.result.edges)) {
-      posts = data.result.edges.slice(0, 12).map((edge: any) => {
-        const node = edge.node || edge
-        return {
-          thumbnail: node.display_url || node.thumbnail_src || node.image_versions2?.candidates?.[0]?.url || "",
-          caption: node.caption?.text || node.caption || "",
-          likes: node.edge_liked_by?.count || node.like_count || 0,
-          comments: node.edge_media_to_comment?.count || node.comment_count || 0,
-        }
+        signal: controller.signal,
       })
-    } else if (Array.isArray(data.edges)) {
-      posts = data.edges.slice(0, 12).map((edge: any) => {
-        const node = edge.node || edge
-        return {
-          thumbnail: node.display_url || node.thumbnail_src || node.image_versions2?.candidates?.[0]?.url || "",
-          caption: node.caption?.text || node.caption || "",
-          likes: node.edge_liked_by?.count || node.like_count || 0,
-          comments: node.edge_media_to_comment?.count || node.comment_count || 0,
-        }
-      })
-    }
 
-    const profileData = {
-      username: data.username || cleanUsername,
-      full_name: data.full_name || data.name || "",
-      biography: data.biography || data.bio || "",
-      profile_pic_url: data.profile_pic_url || "",
-      follower_count: data.follower_count || 0,
-      following_count: data.following_count || 0,
-      media_count: data.media_count || posts.length || 0,
-      is_private: data.is_private || false,
-      is_verified: data.is_verified || false,
-      category: data.category || "",
-      posts: posts,
-    }
+      clearTimeout(timeoutId)
 
-    console.log("[v0] Extracted profile data with", posts.length, "posts")
-    if (posts.length > 0) {
-      console.log("[v0] First post thumbnail:", posts[0].thumbnail?.substring(0, 100))
-    }
+      if (!response.ok) {
+        console.error("[v0] Failed to fetch Instagram image:", response.status)
+        return NextResponse.json({ error: "Failed to fetch image from source" }, { status: response.status })
+      }
 
-    // Cache the result
-    cache.set(cleanUsername, {
-      profile: profileData,
-      timestamp: Date.now(),
-    })
+      const imageBuffer = await response.arrayBuffer()
+      const contentType = response.headers.get("content-type") || "image/jpeg"
 
-    // Clean up old cache entries
-    if (cache.size > 100) {
-      const oldestKey = Array.from(cache.entries()).sort((a, b) => a[1].timestamp - b[1].timestamp)[0][0]
-      cache.delete(oldestKey)
-    }
-
-    return NextResponse.json(
-      {
-        success: true,
-        profile: profileData,
-      },
-      {
+      // 3. Headers de Cache otimizados
+      return new NextResponse(imageBuffer, {
         status: 200,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      },
-    )
-  } catch (err) {
-    console.error("[v0] Error fetching Instagram profile:", err)
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Internal server error",
-      },
-      {
-        status: 500,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      },
-    )
+        headers: {
+          "Content-Type": contentType,
+          // Cache agressivo (público, 7 dias) para evitar bater no Instagram toda hora
+          "Cache-Control": "public, max-age=604800, immutable", 
+          "Access-Control-Allow-Origin": "*",
+        },
+      })
+    } catch (fetchError: any) {
+      clearTimeout(timeoutId)
+      if (fetchError.name === "AbortError") {
+        return NextResponse.json({ error: "Request timeout" }, { status: 504 })
+      }
+      console.error("[v0] Error details:", fetchError)
+      throw fetchError
+    }
+  } catch (error: any) {
+    console.error("[v0] Error proxying Instagram image:", error.message || error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
@@ -183,7 +89,7 @@ export async function OPTIONS() {
     status: 200,
     headers: {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     },
   })

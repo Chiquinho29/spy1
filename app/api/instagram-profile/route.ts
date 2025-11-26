@@ -81,13 +81,14 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
     console.log("[v0] Instagram API response received")
+    console.log("[v0] API Response structure:", JSON.stringify(data).substring(0, 200))
 
-    if (!data || !data.username) {
-      console.log("[v0] Invalid response from Instagram API")
+    if (!data) {
+      console.log("[v0] Empty response from Instagram API")
       return NextResponse.json(
         {
           success: false,
-          error: "Profile not found",
+          error: "Empty response from Instagram API",
         },
         {
           status: 404,
@@ -96,12 +97,30 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const posts = (data.posts || []).slice(0, 12).map((post: any) => ({
-      thumbnail: post.thumbnail || post.display_url || "",
-      caption: post.caption || post.title || "",
-      likes: post.likes || 0,
-      comments: post.comments || 0,
-    }))
+    let posts: any[] = []
+
+    // Instagram120 retorna os posts em data.result.edges
+    if (data.result && Array.isArray(data.result.edges)) {
+      posts = data.result.edges.slice(0, 12).map((edge: any) => {
+        const node = edge.node || edge
+        return {
+          thumbnail: node.display_url || node.thumbnail_src || node.image_versions2?.candidates?.[0]?.url || "",
+          caption: node.caption?.text || node.caption || "",
+          likes: node.edge_liked_by?.count || node.like_count || 0,
+          comments: node.edge_media_to_comment?.count || node.comment_count || 0,
+        }
+      })
+    } else if (Array.isArray(data.edges)) {
+      posts = data.edges.slice(0, 12).map((edge: any) => {
+        const node = edge.node || edge
+        return {
+          thumbnail: node.display_url || node.thumbnail_src || node.image_versions2?.candidates?.[0]?.url || "",
+          caption: node.caption?.text || node.caption || "",
+          likes: node.edge_liked_by?.count || node.like_count || 0,
+          comments: node.edge_media_to_comment?.count || node.comment_count || 0,
+        }
+      })
+    }
 
     const profileData = {
       username: data.username || cleanUsername,
@@ -110,14 +129,17 @@ export async function POST(request: NextRequest) {
       profile_pic_url: data.profile_pic_url || "",
       follower_count: data.follower_count || 0,
       following_count: data.following_count || 0,
-      media_count: data.media_count || data.posts?.length || 0,
+      media_count: data.media_count || posts.length || 0,
       is_private: data.is_private || false,
       is_verified: data.is_verified || false,
       category: data.category || "",
       posts: posts,
     }
 
-    console.log("[v0] Extracted profile data:", JSON.stringify(profileData, null, 2))
+    console.log("[v0] Extracted profile data with", posts.length, "posts")
+    if (posts.length > 0) {
+      console.log("[v0] First post thumbnail:", posts[0].thumbnail?.substring(0, 100))
+    }
 
     // Cache the result
     cache.set(cleanUsername, {

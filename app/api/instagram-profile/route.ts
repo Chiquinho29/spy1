@@ -75,7 +75,9 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json()
-    console.log("[v0] Instagram API data:", JSON.stringify(data, null, 2))
+    console.log("[v0] Instagram API raw response:", JSON.stringify(data, null, 2))
+    console.log("[v0] Follower count field:", data.follower_count, data.followerCount, data.followers)
+    console.log("[v0] Media count field:", data.media_count, data.mediaCount, data.posts_count)
 
     if (!data || !data.username) {
       console.log("[v0] Invalid response from Instagram API")
@@ -95,14 +97,29 @@ export async function POST(request: NextRequest) {
       username: data.username || cleanUsername,
       full_name: data.full_name || data.fullName || data.name || "",
       biography: data.biography || data.bio || "",
-      profile_pic_url: data.profile_pic_url || data.profile_pic_url_hd || data.profilePicUrl || "",
-      follower_count: data.follower_count || data.followerCount || 0,
-      following_count: data.following_count || data.followingCount || 0,
-      media_count: data.media_count || data.mediaCount || 0,
+      profile_pic_url:
+        data.profile_pic_url || data.profile_pic_url_hd || data.profilePicUrl || data.profile_picture || "",
+      follower_count: data.follower_count || data.followerCount || data.followers || data.edge_followed_by?.count || 0,
+      following_count: data.following_count || data.followingCount || data.following || data.edge_follow?.count || 0,
+      media_count:
+        data.media_count ||
+        data.mediaCount ||
+        data.posts_count ||
+        data.postsCount ||
+        data.edge_owner_to_timeline_media?.count ||
+        0,
       is_private: data.is_private || data.isPrivate || false,
       is_verified: data.is_verified || data.isVerified || false,
       category: data.category || "",
-      posts: [], // Simple API may not include posts, will be empty array
+      posts:
+        data.posts ||
+        data.edge_owner_to_timeline_media?.edges?.slice(0, 12).map((edge: any) => ({
+          thumbnail: edge.node?.thumbnail_src || edge.node?.display_url,
+          caption: edge.node?.edge_media_to_caption?.edges?.[0]?.node?.text || "",
+          likes: edge.node?.edge_liked_by?.count || 0,
+          comments: edge.node?.edge_media_to_comment?.count || 0,
+        })) ||
+        [],
     }
 
     console.log("[v0] Extracted profile data:", JSON.stringify(profileData, null, 2))
